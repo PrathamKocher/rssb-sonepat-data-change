@@ -131,3 +131,47 @@ app.post("/api/update", async (req, res) => {
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
       range,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [newRow] }
+    });
+
+    if (logRows.length) {
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: SHEET_ID,
+        range: "History_Log!A:F",
+        valueInputOption: "USER_ENTERED",
+        requestBody: { values: logRows }
+      });
+    }
+
+    if (changed.length) {
+      const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+      const sheetId = meta.data.sheets[0].properties.sheetId;
+
+      const requests = changed.map(c => ({
+        repeatCell: {
+          range: {
+            sheetId,
+            startRowIndex: rowIndex - 1,
+            endRowIndex: rowIndex,
+            startColumnIndex: c,
+            endColumnIndex: c + 1
+          },
+          cell: { userEnteredFormat: { backgroundColor: { red: 1, green: 1, blue: 0.6 } } },
+          fields: "userEnteredFormat(backgroundColor)"
+        }
+      }));
+
+      await sheets.spreadsheets.batchUpdate({ spreadsheetId: SHEET_ID, requestBody: { requests } });
+    }
+
+    res.json({ message: "Updated + Logged + Highlighted", changed });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ---------- START SERVER ----------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(` Server running on ${PORT}`));
