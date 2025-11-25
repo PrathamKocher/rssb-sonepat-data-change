@@ -1,4 +1,4 @@
-const API_BASE = 'https://super-duper-space-fortnight-q7qvvqg9pj75c66g5-3000.app.github.dev/api'; // new server lene par yaha address dalna hoga
+const API_BASE = 'https://rssb-sonepat-data-change.onrender.com/api'; // new server lene par yaha address dalna hoga
 
 const loginCard = document.getElementById('loginCard');
 const editCard = document.getElementById('editCard');
